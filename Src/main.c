@@ -229,6 +229,14 @@ int main(void)
 																					//Data_to_send.accel[0] = (float)((dataToSend_SPI[cou + 2] & 0x80) << 12);// 
 																					//Data_to_send.accel[1] = (float)(dataToSend_SPI[cou + 2] << 12);
 																					Data_to_send.accel[2]	= spi_data_to_send_1_f;
+					   Data_to_send.gyro[0] = 1;
+						 Data_to_send.gyro[1] = 2;
+//						 Data_to_send.gyro[2] = (float)((cou * 100)/SPI_DATA_SIZE);
+
+						 Data_to_send.mag[0] = 3;//(spi_data_to_send_1 & Mask)
+//				 Data_to_send.mag[1] = (uint32_t)(8000 * (2 - sin((double)cou*3.14*2/SPI_DATA_SIZE)));
+//						 Data_to_send.mag[2] = (float)(80000 * sin((double)cou*3.14*2/SPI_DATA_SIZE));																					
+
 																																
 																					Data_to_send.Start = NAN;	
 																					for(int i = 0; i < 68; i++){
@@ -256,12 +264,11 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
-  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLM = 4;
   RCC_OscInitStruct.PLL.PLLN = 100;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
@@ -282,6 +289,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSE, RCC_MCODIV_1);
 }
 
 /**
@@ -432,6 +440,14 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(RX_PULL_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF0_MCO;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : NSS_Pin */
   GPIO_InitStruct.Pin = NSS_Pin;
