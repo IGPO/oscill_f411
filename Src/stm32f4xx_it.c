@@ -43,7 +43,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 int USB_send_massage = 0;
-uint16_t st_cou;
+uint16_t st_cou, st_cou_1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -185,7 +185,7 @@ void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 	//	SPI_read = 1;
-	USB_send_massage = 1;
+	
 	if(st_cou)st_cou--;
 	else {HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	st_cou = 100;}
@@ -193,7 +193,9 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+	if(st_cou_1)st_cou_1--;
+	else {USB_send_massage = 1;
+	st_cou_1 = 9;}
   /* USER CODE END SysTick_IRQn 1 */
 }
 

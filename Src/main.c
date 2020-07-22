@@ -87,7 +87,7 @@ uint8_t dataToSend_TRND[68], *p1;
 uint8_t dataToSend_SPI[SPI_DATA_SIZE * 3];
 
 uint32_t convert(uint32_t);
-uint16_t *adc1_p, *adc2_p, *spi_p, cou = 0, m_cou;
+uint16_t *adc1_p, *adc2_p, *spi_p, cou = 0, m_cou, test_matrix[1024], index;
 uint8_t *byte_p;
 void *p;
 uint8_t SPI_read = 1, num = 1;
@@ -162,14 +162,14 @@ int main(void)
 			spi_p	= p;	
 	__DMA2_CLK_ENABLE();
 	__USART1_CLK_ENABLE();
-	
+	Data_to_send.Start = NAN;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-				for(cou = 0; (cou < SPI_DATA_SIZE * 3); cou+=3){	
+				for(cou = 0; cou < (SPI_DATA_SIZE * 3); cou+=3){	
 				SPI1_nCS_deactivate;			
 				SPI1_nCS_activate;
 				SPI1_nCS_activate;
@@ -214,38 +214,35 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 						// By Systick interrupt Start USB transmission
-				for(cou = 0; cou < (SPI_DATA_SIZE * 3); cou+=3){						
+					index=0;
+				for(cou = 0; cou < (SPI_DATA_SIZE * 3); cou+=3){	
+
+																				//index++;
+																				//if(index >= 1023) index = 1023;
+																				test_matrix[index] = cou;		
 																			spi_data_to_send_1_ni = (uint32_t)(dataToSend_SPI[cou + 2] << 16) + (uint32_t)(dataToSend_SPI[cou + 1] << 8) + (uint32_t)(dataToSend_SPI[cou + 0]);// 
-																	//		spi_data_to_send_1_ni = (uint32_t)(dataToSend_SPI[cou + 2] << 16);// 
-																			spi_data_to_send_1_f = convert_f(spi_data_to_send_1_ni);																		
-																	//		spi_data_to_send_2_ni = (uint32_t)(dataToSend_SPI[cou + 1] << 16);// 
-																	//		spi_data_to_send_2_f = convert_f(spi_data_to_send_2_ni);
-																	//		spi_data_to_send_3_ni = (uint32_t)(dataToSend_SPI[cou + 2] << 16);// 
-																	//		spi_data_to_send_3_f = convert_f(spi_data_to_send_3_ni);					
-
-																					while(USB_send_massage == 0){
+																			spi_data_to_send_1_f = convert_f(spi_data_to_send_1_ni);																			
+																			
+																		while(USB_send_massage == 0){
 																																__NOP();
+																			
 																																}
-																					//Data_to_send.accel[0] = (float)((dataToSend_SPI[cou + 2] & 0x80) << 12);// 
-																					//Data_to_send.accel[1] = (float)(dataToSend_SPI[cou + 2] << 12);
-																					Data_to_send.accel[2]	= spi_data_to_send_1_f;
-					   Data_to_send.gyro[0] = 1;
-						 Data_to_send.gyro[1] = 2;
-//						 Data_to_send.gyro[2] = (float)((cou * 100)/SPI_DATA_SIZE);
-
-						 Data_to_send.mag[0] = 3;//(spi_data_to_send_1 & Mask)
-//				 Data_to_send.mag[1] = (uint32_t)(8000 * (2 - sin((double)cou*3.14*2/SPI_DATA_SIZE)));
-//						 Data_to_send.mag[2] = (float)(80000 * sin((double)cou*3.14*2/SPI_DATA_SIZE));																					
-
+																				USB_send_massage = 0;
+																			 Data_to_send.accel[0]	= index++;
 																																
-																					Data_to_send.Start = NAN;	
+																			 Data_to_send.gyro[0] = 1000;
+																			 Data_to_send.gyro[1] = 2000;
+																			 Data_to_send.gyro[2] = 3000;
+
+																			Data_to_send.mag[2] = 100* index++;																																																														
+																																
 																					for(int i = 0; i < 68; i++){
 																					dataToSend_TRND[i] = *(p1+i);
 																					}
-																					HAL_UART_Transmit_IT(&huart1, dataToSend_TRND, sizeof(dataToSend_TRND));
 																					HAL_UART_Transmit_DMA(&huart1, dataToSend_TRND, sizeof(dataToSend_TRND));
-																													}
-																												}
+
+																															}
+									}
   /* USER CODE END 3 */
 }
 
@@ -380,9 +377,9 @@ static void MX_USART1_UART_Init(void)
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.Mode = UART_MODE_TX;
   huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_8;
   if (HAL_UART_Init(&huart1) != HAL_OK)
   {
     Error_Handler();
